@@ -38,9 +38,14 @@ export default class CustomCommandCommandSet extends BaseListViewCommandSet<ICus
   }
 
   private isCommandSetEnabled(): Promise<void> {
+    // Get the property bag value of the sharepoint web
     return sp.web.select("AllProperties").expand("AllProperties").get().then(props => {
+      // Get the GUID of the current list
       return sp.web.getList(this.context.pageContext.list.serverRelativeUrl).select("Id").get().then(list => {
+        // Multiple GUIDs can be stored in the web property bag. With comma (,) as a seperator
          let lists:any[] = (props["AllProperties"]["spfxcmdsetlists"] as string).split(',');
+         // Check if the current lis's guid is present in the property bag values
+         // If present enabled becomes true, else false
           this.enabled = lists.indexOf(list.Id) > -1;
           return;
       });
@@ -54,13 +59,14 @@ export default class CustomCommandCommandSet extends BaseListViewCommandSet<ICus
     const compareTwoCommand: Command = this.tryGetCommand('COMMAND_2');
     if(this.enabled)
     {
-      
+      // Show the commands
       if (compareOneCommand) {
         // This command should be hidden unless exactly one row is selected.
         compareOneCommand.visible = event.selectedRows.length === 1;
       }
     }
     else{
+      // Hide all the commands as this lists guid is not present in the web property bag
       compareOneCommand.visible = compareTwoCommand.visible = false;
     }
   }
